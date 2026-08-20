@@ -1,10 +1,46 @@
+import { getItems, checklogin, updateStudentMarks } from "../firebase";
+import { useNavigate,useSearchParams } from "react-router";
+import { useEffect, useState } from "react";
+import Loader from "./loader";
 
 
 export default function Students() {
-    let sem = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19,20]
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [searchParams] = useSearchParams();
+    const sem = Number(searchParams.get('sem'));
+    useEffect(() => {
+        if(!checklogin()){
+            navigate('/')
+        }
+    }, [navigate]);
+    const [students, setstudents] = useState([])
+
+    useEffect(() => {
+        let items = getItems(sem);
+        items.then((data) => {
+            console.log("Fetched data from database");
+            setstudents(data);
+            console.log(sem);
+            setLoading(false);
+        });
+    }, [])
+
+    function HandelSubmit(){
+        students.map((data)=>{
+            console.log(data.id, data.marks);
+            updateStudentMarks(data.id, data.marks);
+            alert("All marks uploaded !!")
+        });
+    }
+
+    if (loading) {
+    return <Loader/>;
+  }
+
     return (
         <div className='h-screen flex flex-col justify-center items-center gap-1.5'>
-            <div className="relative m-5 overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default">
+            <div className="relative m-0.5 overflow-x-auto bg-neutral-primary-soft rounded border border-default">
                 <table className="w-[60vw] text-sm text-left rtl:text-right text-body">
                     <thead className="text-sm text-body bg-neutral-secondary-soft border-b rounded-base border-default">
                         <tr>
@@ -26,28 +62,38 @@ export default function Students() {
                         </tr>
                     </thead>
                     <tbody>
-                        {sem.map((a) => (
-                            <tr key={a} className="bg-neutral-primary border-b border-default">
-                                <th scope="row" className="px-6 font-medium text-heading whitespace-nowrap">
-                                    {a}
-                                </th>
+                        {students.map((data, index) => (
+                            <tr key={index} className="bg-neutral-primary border-b border-default">
                                 <td className="px-6 py-0.5">
-                                    3
+                                    {index + 1}
                                 </td>
                                 <td className="px-6 py-0.5">
-                                    11219051625
+                                    {data.sem}
                                 </td>
                                 <td className="px-6 py-0.5">
-                                    Abhi Rajput
+                                    {data.enrollment_no}
                                 </td>
                                 <td className="px-6 py-0.5">
-                                    <input type="number" className="border rounded p-3 inputf" />
+                                    {data.name}
+                                </td>
+                                <td className="px-6 py-0.5">
+                                    <input type="number" className="border rounded p-3 inputf"
+                                        value={data.marks}
+                                        onChange={(e) => {
+                                            const updatedValue = e.target.value;
+                                            setstudents((prevStudents) =>
+                                                prevStudents.map((item, i) =>
+                                                    i === index ? { ...item, marks: updatedValue } : item
+                                                )
+                                            );
+                                        }} />
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+                <button onClick={HandelSubmit} className="bg-[#7747ff] w-max mb-2 px-6 py-2 rounded text-white text-sm font-normal cursor-pointer">Submit</button>
         </div>
     );
 }
