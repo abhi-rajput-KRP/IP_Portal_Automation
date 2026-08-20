@@ -1,5 +1,5 @@
 import { getItems, checklogin, updateStudentMarks } from "../firebase";
-import { useNavigate,useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import Loader from "./loader";
 
@@ -9,13 +9,13 @@ export default function Students() {
     const [loading, setLoading] = useState(true);
     const [searchParams] = useSearchParams();
     const sem = Number(searchParams.get('sem'));
-    useEffect(()=>{
-    checklogin().then((resp)=>{
-      if (!resp){
-        navigate("/");
-      }
-    })
-  }, [navigate]);
+    useEffect(() => {
+        checklogin().then((resp) => {
+            if (!resp) {
+                navigate("/");
+            }
+        })
+    }, [navigate]);
     const [students, setstudents] = useState([])
 
     useEffect(() => {
@@ -27,8 +27,8 @@ export default function Students() {
         });
     }, [])
 
-    function HandelSubmit(){
-        students.map((data)=>{
+    function HandelSubmit() {
+        students.map((data) => {
             console.log(data.id, data.marks);
             updateStudentMarks(data.id, data.marks);
             alert("All marks uploaded !!")
@@ -36,8 +36,8 @@ export default function Students() {
     }
 
     if (loading) {
-    return <Loader/>;
-  }
+        return <Loader />;
+    }
 
     return (
         <div className='h-screen flex flex-col justify-center items-center gap-1.5'>
@@ -80,6 +80,8 @@ export default function Students() {
                                 <td className="px-6 py-0.5">
                                     <input type="number" className="border rounded p-3 inputf"
                                         value={data.marks}
+                                        min="0"
+                                        max="40"
                                         onChange={(e) => {
                                             const updatedValue = e.target.value;
                                             setstudents((prevStudents) =>
@@ -94,7 +96,7 @@ export default function Students() {
                     </tbody>
                 </table>
             </div>
-                <button onClick={HandelSubmit} className="bg-[#7747ff] w-max mb-2 px-6 py-2 rounded text-white text-sm font-normal cursor-pointer">Submit</button>
+            <button onClick={HandelSubmit} className="bg-[#7747ff] w-max mb-2 px-6 py-2 rounded text-white text-sm font-normal cursor-pointer">Submit</button>
         </div>
     );
 }
