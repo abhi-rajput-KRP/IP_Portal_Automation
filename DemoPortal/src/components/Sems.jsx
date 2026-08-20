@@ -1,23 +1,26 @@
 import { checklogin } from "../firebase";
 import { Link, useNavigate } from "react-router";
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import Loader from "./loader";
 
 export default function Sems() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    
+
     useEffect(() => {
-        if(!checklogin()){
-            navigate('/');
-        } else{
-            setLoading(false);
-        }
+        checklogin().then((resp) => {
+            if (!resp) {
+                navigate("/");
+            }
+            else{
+                setLoading(false);
+            }
+        })
     }, [navigate]);
 
     if (loading) {
-    return <Loader/>;
-  }
+        return <Loader />;
+    }
     let sem = [1, 3, 5, 7]
     return (
         <div className='h-screen flex justify-center items-center gap-1.5'>

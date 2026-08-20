@@ -9,11 +9,13 @@ export default function Students() {
     const [loading, setLoading] = useState(true);
     const [searchParams] = useSearchParams();
     const sem = Number(searchParams.get('sem'));
-    useEffect(() => {
-        if(!checklogin()){
-            navigate('/')
-        }
-    }, [navigate]);
+    useEffect(()=>{
+    checklogin().then((resp)=>{
+      if (!resp){
+        navigate("/");
+      }
+    })
+  }, [navigate]);
     const [students, setstudents] = useState([])
 
     useEffect(() => {
@@ -21,7 +23,6 @@ export default function Students() {
         items.then((data) => {
             console.log("Fetched data from database");
             setstudents(data);
-            console.log(sem);
             setLoading(false);
         });
     }, [])

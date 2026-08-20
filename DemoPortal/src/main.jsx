@@ -5,6 +5,7 @@ import './index.css'
 import Login from './components/Login.jsx';
 import Students from './components/Students.jsx';
 import Sems from './components/Sems.jsx';
+import Logout from "./components/logout.jsx"
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
   {
     path: "/students",
     element: <Students />,
+  },
+  {
+    path: "/logout",
+    element: <Logout />,
   },
 ]);
 

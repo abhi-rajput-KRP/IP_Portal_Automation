@@ -5,15 +5,18 @@ import { loginUser, checklogin } from '../firebase'
 async function HandelSubmit(e, email, password, navigate) {
   e.preventDefault();
   await loginUser(email, password);
-  navigate("/students");
+  navigate("/sems");
 }
+
 
 export default function Login() {
   const navigate = useNavigate();
-  useEffect(() => {
-    if (checklogin()) {
-      navigate('/students')
-    }
+  useEffect(()=>{
+    checklogin().then((resp)=>{
+      if (resp){
+        navigate("/sems");
+      }
+    })
   }, [navigate]);
 
   const [email, setemail] = useState("");

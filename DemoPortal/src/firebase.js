@@ -30,14 +30,12 @@ export async function loginUser(email, password) {
 }
 
 export function checklogin() {
+    return new Promise((resolve) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-            return true;
-        } else{
-            return false;
-        }
+      unsubscribe(); // Unsubscribe immediately after the first check
+      resolve(Boolean(user));
     });
-    return () => unsubscribe();
+  });
 }
 
 export async function logout() {
