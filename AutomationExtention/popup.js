@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fileMetaEl.textContent = `${parsedData.length} records found in "${firstSheetName}"`;
       fileInfo.style.display = 'block';
       btnFill.disabled = false;
-      btnFill.innerHTML = `<span>⚡</span> Fill ${parsedData.length} Records`;
+      btnFill.innerHTML = `<span>⚡</span> Fill Records`;
     } catch (err) {
       console.error('Error parsing file:', err);
       showStatus('Failed to read Excel/CSV file', 'error');
