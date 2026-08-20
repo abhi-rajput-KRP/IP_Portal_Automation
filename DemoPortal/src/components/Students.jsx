@@ -70,7 +70,7 @@ export default function Students() {
 
         // 2. Create a new workbook and attach the sheet
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Students');
 
         // 3. Trigger download
         XLSX.writeFile(workbook, 'exported_table.xlsx');
