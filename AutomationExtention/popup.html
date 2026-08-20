@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP Portal Autofill</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 16px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .header-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #6366f1, #3b82f6);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .header h1 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .header p {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .upload-box {
+      border: 2px dashed #334155;
+      border-radius: 8px;
+      padding: 20px 12px;
+      text-align: center;
+      background: #1e293b;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .upload-box:hover, .upload-box.dragover {
+      border-color: #6366f1;
+      background: rgba(99, 102, 241, 0.08);
+    }
+
+    .upload-box input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .upload-text {
+      font-size: 12px;
+      font-weight: 500;
+      color: #e2e8f0;
+    }
+
+    .upload-text span {
+      color: #818cf8;
+      text-decoration: underline;
+    }
+
+    .upload-hint {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .file-info {
+      display: none;
+      margin-top: 12px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .file-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #38bdf8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-meta {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .btn {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-msg {
+      margin-top: 10px;
+      font-size: 11px;
+      text-align: center;
+      padding: 6px;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .status-msg.success {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      display: block;
+    }
+
+    .status-msg.error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      display: block;
+    }
+  </style>
+  <script src="xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">📊</div>
+    <div>
+      <h1>IP Portal Autofill</h1>
+      <p>Upload Excel to autofill marks</p>
+    </div>
+  </div>
+
+  <!-- Upload Area -->
+  <div class="upload-box" id="drop-zone">
+    <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv">
+    <div class="upload-icon">📁</div>
+    <div class="upload-text">Choose an Excel file or <span>browse</span></div>
+    <div class="upload-hint">Supports .xlsx, .xls, .csv</div>
+  </div>
+
+  <!-- File Details (shown after file selected) -->
+  <div class="file-info" id="file-info">
+    <div class="file-name" id="file-name">filename.xlsx</div>
+    <div class="file-meta" id="file-meta">0 rows loaded</div>
+  </div>
+
+  <!-- Action Button -->
+  <button type="button" class="btn" id="btn-fill" disabled>
+    <span>⚡</span> Autofill Web Page
+  </button>
+
+  <!-- Status Message -->
+  <div class="status-msg" id="status-msg"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
