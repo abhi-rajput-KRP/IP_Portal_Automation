@@ -2,6 +2,7 @@ import { getItems, checklogin, updateStudentMarks } from "../firebase";
 import { useNavigate, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import Loader from "./loader";
+import * as XLSX from 'xlsx';
 
 
 export default function Students() {
@@ -29,10 +30,50 @@ export default function Students() {
 
     function HandelSubmit() {
         students.map((data) => {
-            console.log(data.id, data.marks);
-            updateStudentMarks(data.id, data.marks);
-            alert("All marks uploaded !!")
+            // console.log(data.id, data.marks);
+            if (Number(data.marks) !== 0) {
+                updateStudentMarks(data.id, data.marks);
+            }
         });
+        alert("All marks uploaded !!")
+    }
+
+    function ExportData() {
+        const table = document.getElementById('content-table');
+        const rows = table.querySelectorAll('tr');
+        const data = [];
+
+        rows.forEach((row) => {
+            const rowData = [];
+            const cells = row.querySelectorAll('th, td');
+
+            cells.forEach((cell) => {
+                // Check for input, select, or textarea inside the cell
+                const input = cell.querySelector('input, select, textarea');
+
+                if (input) {
+                    // Convert numeric inputs to numbers, otherwise keep as string
+                    const val = input.value;
+                    const num = Number(val);
+                    rowData.push(val !== '' && !isNaN(num) ? num : val);
+                }
+                else {
+                    rowData.push(cell.innerText.trim());
+                }
+            });
+
+            data.push(rowData);
+        });
+        
+        // 1. Create a worksheet from the 2D array
+        const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+        // 2. Create a new workbook and attach the sheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
+
+        // 3. Trigger download
+        XLSX.writeFile(workbook, 'exported_table.xlsx');
     }
 
     if (loading) {
@@ -42,7 +83,7 @@ export default function Students() {
     return (
         <div className='h-screen flex flex-col justify-center items-center gap-1.5'>
             <div className="relative m-0.5 overflow-x-auto bg-neutral-primary-soft rounded border border-default">
-                <table className="w-[60vw] text-sm text-left rtl:text-right text-body">
+                <table id="content-table" className="w-[60vw] text-sm text-left rtl:text-right text-body">
                     <thead className="text-sm text-body bg-neutral-secondary-soft border-b rounded-base border-default">
                         <tr>
                             <th scope="col" className="px-6 py-3 font-medium">
@@ -78,7 +119,7 @@ export default function Students() {
                                     {data.name}
                                 </td>
                                 <td className="px-6 py-0.5">
-                                    <input type="number" className="border rounded p-3 inputf"
+                                    <input type="number" id={data.enrollment_no} className="border rounded p-3 inputf"
                                         value={data.marks}
                                         min="0"
                                         max="40"
@@ -97,6 +138,7 @@ export default function Students() {
                 </table>
             </div>
             <button onClick={HandelSubmit} className="bg-[#7747ff] w-max mb-2 px-6 py-2 rounded text-white text-sm font-normal cursor-pointer">Submit</button>
+            <button id="export-btn" className="bg-[#7747ff] w-max mb-2 px-6 py-2 rounded text-white text-sm font-normal cursor-pointer" onClick={ExportData}>Export to Excel</button>
         </div>
     );
 }

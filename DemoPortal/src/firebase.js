@@ -62,9 +62,8 @@ export async function updateStudentMarks(id, marks) {
   try {
     const studentRef = doc(db, "Students", id);
     await updateDoc(studentRef, {
-      marks: Number(marks) // Ensure it is stored as a number
+      marks: Number(marks)
     });
-    console.log("Marks updated successfully!", id);
   } catch (error) {
     console.error("Error updating marks:", error);
   }
