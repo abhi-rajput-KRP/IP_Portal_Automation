@@ -88,6 +88,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // Target number or text input in row
         const targetInput = row.querySelector('input[type="number"]');
         if (targetInput && targetInput.value != matchedMarks  ) {
+          if(isNaN(Number(matchedMarks))){
+            matchedMarks = 0;
+          }
           setReactInputValue(targetInput, matchedMarks);
           targetInput.style.backgroundColor = '#dcfce7'; // subtle green highlight
           targetInput.style.transition = 'background-color 0.5s ease';

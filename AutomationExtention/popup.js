@@ -1,4 +1,12 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const body = document.querySelector("body");
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab || !tab.id) {
+    body.innerHTML = `<div>No tab open</div>`;
+  }
+  else if (!tab.url || !tab.url.startsWith('https://ip-portal-automation.vercel.app/students')) {
+    body.innerHTML = `<div>Please open https://ip-portal-automation.vercel.app/students'</div>`;
+  }
   const fileInput = document.getElementById('excel-file-input');
   const dropZone = document.getElementById('drop-zone');
   const fileInfo = document.getElementById('file-info');
@@ -67,18 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab || !tab.id) {
-        showStatus('No active tab found', 'error');
-        btnFill.disabled = false;
-        return;
-      }
-
-      if (!tab.url || !tab.url.startsWith('https://ip-portal-automation.vercel.app/students')) {
-        showStatus('Please open https://ip-portal-automation.vercel.app/students', 'error');
-        btnFill.disabled = false;
-        btnFill.innerHTML = `<span>⚡</span> Fill Records`;
-        return;
-      }
 
       chrome.tabs.sendMessage(tab.id, {
         action: 'AUTOFILL_EXCEL_DATA',
@@ -93,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (response && response.success) {
-          showStatus(`✓ Filled student records!`, 'success');
+          showStatus(`✓ Filled ${response.filledCount} student records!`, 'success');
         } else {
           showStatus(response?.error || 'Completed with warnings', 'error');
         }
