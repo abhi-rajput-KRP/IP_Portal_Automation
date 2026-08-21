@@ -53,7 +53,7 @@ export async function getItems(sem) {
         id: doc.id,
         ...doc.data()
     }));
-    items.sort((a,b)=>Number(a['enrollment_no'].slice(0,2)) - Number(b['enrollment_no'].slice(0,2)));
+    items.sort((a,b)=>Number(a['enrollment_no'].slice(0,3)) - Number(b['enrollment_no'].slice(0,2)));
     return items;
 }
 
