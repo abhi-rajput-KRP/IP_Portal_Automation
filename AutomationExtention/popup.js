@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     body.innerHTML = `<div>No tab open</div>`;
   }
   else if (!tab.url || !tab.url.startsWith('https://ip-portal-automation.vercel.app/students')) {
-    body.innerHTML = `<div>Please open https://ip-portal-automation.vercel.app/students'</div>`;
+    body.innerHTML = `<div>Please open https://ip-portal-automation.vercel.app/students</div>`;
   }
   const fileInput = document.getElementById('excel-file-input');
   const dropZone = document.getElementById('drop-zone');
@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnFill = document.getElementById('btn-fill');
   const statusMsg = document.getElementById('status-msg');
 
-  // ⚠️ CHANGE THIS every time your Codespaces URL changes (e.g. after a restart)
-  const BACKEND_URL = 'https://redesigned-space-barnacle-7v4prww4r477fpggq-8000.app.github.dev';
+  //  CHANGE THIS every time your Codespaces URL changes (e.g. after a restart)
+  const BACKEND_URL = 'http://127.0.0.1:8000';
   const PORTAL_URL_PREFIX = 'https://ip-portal-automation.vercel.app/students';
 
   let parsedData = [];
