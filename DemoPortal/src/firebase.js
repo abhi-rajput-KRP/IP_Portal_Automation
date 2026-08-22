@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { signInWithEmailAndPassword, getAuth, signOut, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, query, where, getDocs, doc,updateDoc, orderBy } from "firebase/firestore";
+import { getFirestore, collection, query, where, getDocs, doc,updateDoc } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_apiKey,
@@ -45,8 +45,7 @@ export async function logout() {
 export async function getItems(sem) {
     const q = query(
         collection(db, "Students"),
-        where('sem','==',sem),
-        orderBy('enrollment_no', 'asc')
+        where('sem','==',sem)
     );
 
     const querySnapshot = await getDocs(q);
@@ -54,7 +53,7 @@ export async function getItems(sem) {
         id: doc.id,
         ...doc.data()
     }));
-
+    items.sort((a,b)=>Number(a['enrollment_no'].slice(0,3)) - Number(b['enrollment_no'].slice(0,2)));
     return items;
 }
 

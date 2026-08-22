@@ -1,5 +1,12 @@
-// popup.js
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const body = document.querySelector("body");
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab || !tab.id) {
+    body.innerHTML = `<div>No tab open</div>`;
+  }
+  else if (!tab.url || !tab.url.startsWith('https://ip-portal-automation.vercel.app/students')) {
+    body.innerHTML = `<div>Please open https://ip-portal-automation.vercel.app/students'</div>`;
+  }
   const fileInput = document.getElementById('excel-file-input');
   const dropZone = document.getElementById('drop-zone');
   const fileInfo = document.getElementById('file-info');
@@ -77,19 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-      if (!tab || !tab.id) {
-        showStatus('No active tab found', 'error');
-        btnFill.disabled = false;
-        return;
-      }
-
-      if (!tab.url || !tab.url.startsWith(PORTAL_URL_PREFIX)) {
-        showStatus(`Please open ${PORTAL_URL_PREFIX}`, 'error');
-        btnFill.disabled = false;
-        btnFill.innerHTML = `<span>⚡</span> Fill Records`;
-        return;
-      }
 
       // 1. Ask content.js to scrape the live portal table
       const scrapeResp = await sendMessageToTab(tab.id, { action: 'SCRAPE_PORTAL_TABLE' });
