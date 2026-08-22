@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnFill = document.getElementById('btn-fill');
   const statusMsg = document.getElementById('status-msg');
 
-  //  CHANGE THIS every time your Codespaces URL changes (e.g. after a restart)
   const BACKEND_URL = 'http://127.0.0.1:8000';
   const PORTAL_URL_PREFIX = 'https://ip-portal-automation.vercel.app/students';
 

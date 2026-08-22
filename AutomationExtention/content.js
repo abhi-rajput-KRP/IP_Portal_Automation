@@ -1,7 +1,4 @@
 // content.js
-
-const BACKEND_URL ="http://127.0.0.1:8000";
-
 function setReactInputValue(inputElement, value) {
   if (!inputElement) return;
   const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
