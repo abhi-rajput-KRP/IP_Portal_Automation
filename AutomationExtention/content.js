@@ -1,109 +1,107 @@
-/**
- * Content script for IP Portal Automation
- * Listens for parsed Excel data and matches rows by Enrollment Number / Name / S.No,
- * then fills input fields with full React synthetic event dispatching.
- */
+// content.js
 
-// Helper to set values on React / DOM inputs
 function setReactInputValue(inputElement, value) {
   if (!inputElement) return;
-
   const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-    window.HTMLInputElement.prototype,
-    'value'
+    window.HTMLInputElement.prototype, 'value'
   )?.set;
-
   if (nativeInputValueSetter) {
     nativeInputValueSetter.call(inputElement, value);
   } else {
     inputElement.value = value;
   }
-
-  // Dispatch events so React/Vue/Angular synthetic event systems catch the change
   inputElement.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
   inputElement.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
   inputElement.dispatchEvent(new Event('blur', { bubbles: true, composed: true }));
 }
 
-// Normalizer for flexible matching
 function normalize(val) {
   if (val === null || val === undefined) return '';
   return String(val).trim().toLowerCase().replace(/^0+/, '');
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'AUTOFILL_EXCEL_DATA') {
-    const excelData = request.data || [];
-    if (excelData.length === 0) {
-      sendResponse({ success: false, error: 'No data provided' });
-      return true;
+
+function getColumnIndices() {
+  const headerCells = document.querySelectorAll('table thead th, table tr:first-child th');
+  const indices = {};
+
+  headerCells.forEach((th, idx) => {
+    const text = th.innerText.trim().toLowerCase();
+    if (text.includes('enrol') || text.includes('enlorr') || text.includes('roll')) {
+      indices.enrolment_no = idx;
     }
+    if (text === 'name') indices.name = idx;
+  });
 
-    // Build lookup maps by enrollment number, student name, and S.No
-    const enrollmentMap = new Map();
-    const nameMap = new Map();
+  return indices;
+}
 
-    excelData.forEach(row => {
-      // Look for common enrollment/roll number headers
-      const enrollKey = row['Enlorrment Number'] ?? row['Enrollment Number'] ?? row['Enrollment No'] ?? row['Roll No'] ?? row['RollNo'] ?? row['ID'];
-      const nameKey = row['Name'] ?? row['Student Name'];
-      const marksVal = row['Marks Alloted'] ?? row['Marks'] ?? row['Internal Marks'] ?? row['Marks Allotted'] ?? row['Score'];
+function scrapePortalStudents() {
+  const students = [];
+  const rows = document.querySelectorAll('table tbody tr, table tr');
 
-      if (enrollKey !== undefined && marksVal !== undefined) {
-        enrollmentMap.set(normalize(enrollKey), marksVal);
-      }
-      if (nameKey !== undefined && marksVal !== undefined) {
-        nameMap.set(normalize(nameKey), marksVal);
-      }
-    });
+  rows.forEach((row, idx) => {
+    const cells = row.querySelectorAll('td, th');
+    const input = row.querySelector('input[type="number"]');
+    if (!input) return;
 
-    let filledCount = 0;
+    const enrolment_no = cells[2] ? cells[2].innerText.trim() : '';
+    const name = cells[3] ? cells[3].innerText.trim() : '';
+    if (!enrolment_no) return;
 
-    // Find all table rows
-    const rows = document.querySelectorAll('table tbody tr, table tr');
+    // ALWAYS assign our own safe, predictable id — don't trust/reuse the portal's existing one
+    input.id = `agent-field-${idx}`;
 
-    rows.forEach(row => {
-      const rowText = row.innerText || row.textContent || '';
-      const inputs = row.querySelectorAll('input');
-      if (inputs.length === 0) return;
+    students.push({ enrolment_no, name, field_selector: `#${input.id}` });
+  });
 
-      // Check if any cell matches enrollment number or name
-      const cells = row.querySelectorAll('td, th');
-      let matchedMarks = null;
+  return students;
+}
 
-      for (const cell of cells) {
-        const cellText = normalize(cell.innerText || cell.textContent || '');
-        if (enrollmentMap.has(cellText)) {
-          matchedMarks = enrollmentMap.get(cellText);
-          break;
-        }
-        if (nameMap.has(cellText)) {
-          matchedMarks = nameMap.get(cellText);
-          break;
-        }
-      }
 
-      // If matched, fill the marks input in this row
-      if (matchedMarks !== null && matchedMarks !== undefined) {
-        // Target number or text input in row
-        const targetInput = row.querySelector('input[type="number"]');
-        if (targetInput && targetInput.value != matchedMarks  ) {
-          if(isNaN(Number(matchedMarks))){
-            matchedMarks = 0;
-          }
-          setReactInputValue(targetInput, matchedMarks);
-          targetInput.style.backgroundColor = '#dcfce7'; // subtle green highlight
-          targetInput.style.transition = 'background-color 0.5s ease';
-          filledCount++;
-        }
-      }
-    });
+// --- Fill + annotate based on backend's field_instructions ---
+function applyFieldInstructions(instructions) {
+  let filledCount = 0;
+  instructions.forEach(instr => {
+    const el = document.querySelector(instr.field_selector);
+    if (!el) return;
 
-    sendResponse({
-      success: true,
-      filledCount: filledCount,
-      totalExcelRows: excelData.length
-    });
+    if (instr.value !== null && instr.value !== undefined) {
+      setReactInputValue(el, instr.value);
+      filledCount++;
+    }
+    el.style.border = `2px solid ${instr.border_color || '#ccc'}`;
+    el.title = instr.reason || '';
+    el.dataset.agentStatus = instr.status || '';
+    el.dataset.agentEnrolmentNo = instr.enrolment_no || '';
+  });
+  return filledCount;
+}
+
+// --- Rescan current field values before final submit ---
+function rescanFieldValues() {
+  const filled = document.querySelectorAll('[data-agent-status]');
+  return Array.from(filled).map(el => ({
+    enrolment_no: el.dataset.agentEnrolmentNo,
+    field_selector: `#${el.id}`,
+    value: el.value,
+  }));
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'SCRAPE_PORTAL_TABLE') {
+    sendResponse({ students: scrapePortalStudents() });
+    return true;
   }
-  return true;
+
+  if (request.action === 'APPLY_FIELD_INSTRUCTIONS') {
+    const filledCount = applyFieldInstructions(request.data || []);
+    sendResponse({ success: true, filledCount, total: request.data.length });
+    return true;
+  }
+
+  if (request.action === 'RESCAN_FIELDS') {
+    sendResponse({ values: rescanFieldValues() });
+    return true;
+  }
 });
