@@ -66,7 +66,7 @@ function applyFieldInstructions(instructions) {
     const el = document.querySelector(instr.field_selector);
     if (!el) return;
 
-    if (instr.value !== null && instr.value !== undefined) {
+    if (instr.value !== null && instr.value !== undefined && instr.value !== el.value) {
       setReactInputValue(el, instr.value);
       filledCount++;
     }

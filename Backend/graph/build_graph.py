@@ -1,7 +1,13 @@
 from graph.schemas import WorkflowState
 from graph.nodes import parse_excel, ocr_extract, deterministic_match, fuzzy_match, llm_resolve_ambiguous, validate_marks, dry_run_fill_and_annotate, await_faculty_review, generate_summary, log_audit, route_after_deterministic, route_after_fuzzy
 from langgraph.graph import StateGraph, START, END
-from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.postgres import PostgresSaver
+import os
+from dotenv import load_dotenv
+
+# Setting up Neon-Postgres DB
+load_dotenv()
+DB_URI = os.getenv("DATABASE_URL")
 
 builder = StateGraph(WorkflowState)
 
@@ -27,6 +33,10 @@ builder.add_edge("await_faculty_review", "generate_summary")
 builder.add_edge("generate_summary", "log_audit")
 builder.add_edge("log_audit", END)
 
-checkpointer_cm= SqliteSaver.from_conn_string("workflow_checkpoints.db")
-checkpointer=checkpointer_cm.__enter__()
+checkpointer_cm = PostgresSaver.from_conn_string(DB_URI)
+checkpointer = checkpointer_cm.__enter__()
+
+# Initialize tables required by LangGraph on Neon (runs automatically if missing)
+checkpointer.setup()
+
 graph = builder.compile(checkpointer=checkpointer)

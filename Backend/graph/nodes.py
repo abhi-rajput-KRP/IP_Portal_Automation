@@ -1,4 +1,3 @@
-import sqlite3
 import json
 import re
 from datetime import datetime, timezone
@@ -7,7 +6,14 @@ from langgraph.types import interrupt
 from graph.prompts import build_prompt
 from graph.schemas import WorkflowState, LLMClassificationList
 from config import llm
+import time
+import os
+import psycopg
+from dotenv import load_dotenv
 
+# Setting up Neon-Postgres DB
+load_dotenv()
+db_url = os.getenv("DATABASE_URL")
 
 
 def ingest_input(state: WorkflowState) -> dict:
@@ -294,47 +300,49 @@ def generate_summary(state: WorkflowState) -> dict:
 
 
 def log_audit(state: WorkflowState) -> dict:
-    conn = sqlite3.connect("audit_log.db")
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS audit_runs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            thread_id TEXT,
-            timestamp TEXT,
-            total_records INTEGER,
-            auto_matched INTEGER,
-            manually_resolved INTEGER,
-            summary_text TEXT,
-            field_instructions_json TEXT,
-            final_values_json TEXT
-        )
-    """)
-
-    field_instructions = state.get("field_instructions", [])
-    final_values = state.get("final_field_values", [])
-
-    auto_matched = sum(1 for f in field_instructions if f.get("status") == "confirmed")
-    manually_resolved = sum(1 for f in field_instructions if f.get("status") in ("flagged", "empty"))
-
-    cursor.execute("""
-        INSERT INTO audit_runs (
-            thread_id, timestamp, total_records, auto_matched, 
-            manually_resolved, summary_text, field_instructions_json, final_values_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        state.get("thread_id", "unknown"),
-        datetime.now(timezone.utc).isoformat(),
-        len(field_instructions),
-        auto_matched,
-        manually_resolved,
-        state.get("summary_text", ""),
-        json.dumps(field_instructions),
-        json.dumps(final_values),
-    ))
-
-    conn.commit()
-    conn.close()
+    try:
+    # Establish connection to Neon DB
+        with psycopg.connect(db_url) as conn:
+        # Open a cursor to perform database operations
+            with conn.cursor() as cur:
+            # Query the current Postgres version
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS audit_runs (
+                id SERIAL PRIMARY KEY,
+                thread_id TEXT,
+                timestamp TEXT,
+                total_records INTEGER,
+                auto_matched INTEGER,
+                manually_resolved INTEGER,
+                summary_text TEXT,
+                field_instructions_json TEXT,
+                final_values_json TEXT
+            )
+            """)
+                field_instructions = state.get("field_instructions", [])
+                final_values = state.get("final_field_values", [])
+            
+                auto_matched = sum(1 for f in field_instructions if f.get("status") == "confirmed")
+                manually_resolved = sum(1 for f in field_instructions if f.get("status") in ("flagged", "empty"))
+            
+                cur.execute("""
+                    INSERT INTO audit_runs (
+                        thread_id, timestamp, total_records, auto_matched, 
+                        manually_resolved, summary_text, field_instructions_json, final_values_json
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    state.get("thread_id", "unknown"),
+                    datetime.now(timezone.utc).isoformat(),
+                    len(field_instructions),
+                    auto_matched,
+                    manually_resolved,
+                    state.get("summary_text", ""),
+                    json.dumps(field_instructions),
+                    json.dumps(final_values),
+                ))
+            
+    except Exception as e:
+        print(f"Failed to connect to the database: {e}")
 
     return {} 
 
