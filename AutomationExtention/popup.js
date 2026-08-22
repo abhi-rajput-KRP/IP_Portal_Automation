@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // switch the button into "stage 2" mode
       btnFill.disabled = false;
-      btnFill.textContent = 'Review & Submit';
+      btnFill.textContent = 'Create Final Logs';
       btnFill.onclick = () => confirmAndSubmit(tab.id);
 
     } catch (err) {
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ---------- Stage 2: rescan + resume + submit ----------
   async function confirmAndSubmit(tabId) {
     btnFill.disabled = true;
-    btnFill.textContent = 'Submitting...';
+    btnFill.textContent = 'Logging...';
 
     try {
       const rescanResp = await sendMessageToTab(tabId, { action: 'RESCAN_FIELDS' });

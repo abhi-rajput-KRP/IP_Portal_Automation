@@ -1,5 +1,7 @@
 // content.js
 
+const BACKEND_URL ="http://127.0.0.1:8000";
+
 function setReactInputValue(inputElement, value) {
   if (!inputElement) return;
   const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
@@ -66,11 +68,11 @@ function applyFieldInstructions(instructions) {
     const el = document.querySelector(instr.field_selector);
     if (!el) return;
 
-    if (instr.value !== null && instr.value !== undefined && instr.value !== el.value) {
+    if (instr.value !== null && instr.value !== undefined) {
       setReactInputValue(el, instr.value);
       filledCount++;
     }
-    el.style.border = `2px solid ${instr.border_color || '#ccc'}`;
+    el.style.background = `${instr.bg_color || '#ffff'}`;
     el.title = instr.reason || '';
     el.dataset.agentStatus = instr.status || '';
     el.dataset.agentEnrolmentNo = instr.enrolment_no || '';

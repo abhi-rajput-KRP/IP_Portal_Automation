@@ -274,18 +274,18 @@ def normalize_and_check(raw_value) -> dict:
 def dry_run_fill_and_annotate(state: WorkflowState) -> dict:
     instructions = []
     for r in state["validated"]:
-        color = "green" if r["confidence"] > 0.9 else "yellow"
+        color = "#e6ffe6" if r["confidence"] > 0.9 else "#eec890"
         instructions.append({
             **r,
-            "status": "confirmed" if color == "green" else "flagged",
-            "border_color": color,
-            "icon": "check" if color == "green" else "question",
+            "status": "confirmed" if color == "#e6ffe6" else "flagged",
+            "bg_color": color,
+            "icon": "check" if color == "#e6ffe6" else "question",
         })
     for r in state["unresolved"]:
         instructions.append({
             **r,
             "status": "empty",
-            "border_color": "red",
+            "bg_color": "#ee9090",
             "icon": "flag",
             "reason": r.get("reason", "No confident match found"),
         })
