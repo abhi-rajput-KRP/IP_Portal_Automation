@@ -123,7 +123,7 @@ The ingestion engine automatically recognizes varied column header naming conven
 ### 1. Prerequisites
 - A Chromium-based browser (Google Chrome, Microsoft Edge, Brave, or Chromium).
 - Backend service running locally on `http://127.0.0.1:8000`. (If running FastAPI Server locally)
-- Deployed Backend service running on `https://ip-portal-automation.onrender.com`. (If running FastAPI Server locally)
+- Deployed Backend service running on `https://ip-portal-automation.onrender.com`. (if using deployed Backend)
 
 ### 2. Load the Unpacked Extension
 1. Open the browser and navigate to the extensions management console:
