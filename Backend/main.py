@@ -14,6 +14,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def health_check():
+    return {"status": "alive"}
+
 @app.post("/api/run-workflow")
 async def run_workflow(payload: dict):
     thread_id = str(uuid.uuid4())

@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     body.innerHTML = `<div>No tab open</div>`;
   }
   else if (!tab.url || !tab.url.startsWith('https://ip-portal-automation.vercel.app/students')) {
-    body.innerHTML = `<div>Please open https://ip-portal-automation.vercel.app/students'</div>`;
+    body.innerHTML = `<div>Please open https://ip-portal-automation.vercel.app/students</div>`;
   }
   const fileInput = document.getElementById('excel-file-input');
   const dropZone = document.getElementById('drop-zone');
@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnFill = document.getElementById('btn-fill');
   const statusMsg = document.getElementById('status-msg');
 
-  // ⚠️ CHANGE THIS every time your Codespaces URL changes (e.g. after a restart)
-  const BACKEND_URL = 'https://redesigned-space-barnacle-7v4prww4r477fpggq-8000.app.github.dev';
+  // const BACKEND_URL = 'http://127.0.0.1:8000';
+  const BACKEND_URL = 'https://ip-portal-automation.onrender.com';
   const PORTAL_URL_PREFIX = 'https://ip-portal-automation.vercel.app/students';
 
   let parsedData = [];
@@ -117,11 +117,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         `✓ ${fillResp.filledCount}/${fillResp.total} filled — ${result.summary_text || ''}`,
         'success'
       );
-
-      // switch the button into "stage 2" mode
-      btnFill.disabled = false;
-      btnFill.textContent = 'Review & Submit';
-      btnFill.onclick = () => confirmAndSubmit(tab.id);
+      await sendMessageToTab(tab.id, { action: 'INJECT_BUTTON', data:currentThreadId });
+      btnFill.innerText = "Done"
 
     } catch (err) {
       console.error(err);
@@ -129,41 +126,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       btnFill.disabled = false;
       btnFill.innerHTML = `<span>⚡</span> Fill Records`;
       btnFill.onclick = runWorkflow;
-    }
-  }
-
-  // ---------- Stage 2: rescan + resume + submit ----------
-  async function confirmAndSubmit(tabId) {
-    btnFill.disabled = true;
-    btnFill.textContent = 'Submitting...';
-
-    try {
-      const rescanResp = await sendMessageToTab(tabId, { action: 'RESCAN_FIELDS' });
-
-      const response = await fetch(`${BACKEND_URL}/api/resume-workflow`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          thread_id: currentThreadId,
-          final_field_values: rescanResp.values,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Backend returned status ${response.status}`);
-      }
-
-      const result = await response.json();
-      showStatus(result.summary_text || 'Submitted successfully', 'success');
-
-      btnFill.textContent = 'Done';
-      btnFill.disabled = true;
-
-    } catch (err) {
-      console.error(err);
-      showStatus('Error submitting: ' + err.message, 'error');
-      btnFill.disabled = false;
-      btnFill.textContent = 'Review & Submit';
     }
   }
 

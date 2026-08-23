@@ -20,7 +20,7 @@ For each unmatched record, respond with a JSON array. Each element must have exa
   "matched_enrolment_no": "<enrolment_no of matched portal student, or null if unresolved>",
   "matched_name": "<name of matched portal student, or null if unresolved>",
   "confidence": <float between 0 and 1>,
-  "reason": "<one short sentence explaining the match or why it's unresolved>"
+  "reason": "<one short sentence explaining reason for the confidence score>"
 }}
 
 Respond with ONLY the JSON array. No preamble, no markdown formatting, no additional text."""

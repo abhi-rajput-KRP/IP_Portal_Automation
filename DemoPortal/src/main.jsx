@@ -19,11 +19,7 @@ const router = createBrowserRouter([
   {
     path: "/students",
     element: <Students />,
-  },
-  {
-    path: "/logout",
-    element: <Logout />,
-  },
+  }
 ]);
 
 createRoot(document.getElementById('root')).render(

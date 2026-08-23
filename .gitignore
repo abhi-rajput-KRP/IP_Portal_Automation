@@ -1,9 +1,2 @@
-.env
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.egg-info/
-.eggs/
-build/
-dist/
+testing_scripts
+.gitignore
