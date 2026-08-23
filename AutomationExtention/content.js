@@ -78,13 +78,72 @@ function applyFieldInstructions(instructions) {
 }
 
 // --- Rescan current field values before final submit ---
-function rescanFieldValues() {
-  const filled = document.querySelectorAll('[data-agent-status]');
-  return Array.from(filled).map(el => ({
-    enrolment_no: el.dataset.agentEnrolmentNo,
-    field_selector: `#${el.id}`,
-    value: el.value,
-  }));
+
+async function injectButton(threadid) {
+  // Function to handle the injection
+  const targetParentElement = document.body;
+
+  // Prevent duplicate injections if the script runs multiple times
+  if (document.getElementById('my-extension-btn')) return;
+
+  // 2. Create the button element
+  const button = document.createElement('button');
+  button.id = 'my-extension-btn';
+  button.innerText = 'Create Audit Logs';
+
+  // 3. Style the button (optional)
+  button.style.background = "linear-gradient(135deg, #6366f1, #4f46e5)";
+  button.style.color = '#ffffff';
+  button.style.padding = '10px 10px';
+  button.style.border = 'none';
+  button.style.position = 'fixed';
+  button.style.right = '20px';
+  button.style.bottom = '20px';
+  button.style.borderRadius = '5px';
+  button.style.cursor = 'pointer';
+
+  // 4. Add functionality via an event listener
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    button.textContent = 'Logging...';
+    try {
+      const filled = document.querySelectorAll('[data-agent-status]');
+      const rescanResp = Array.from(filled).map(el => ({
+        enrolment_no: el.dataset.agentEnrolmentNo,
+        field_selector: `#${el.id}`,
+        value: el.value,
+      }));
+      const BACKEND_URL = 'http://127.0.0.1:8000';
+      const response = await fetch(`${BACKEND_URL}/api/resume-workflow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          thread_id: threadid,
+          final_field_values: rescanResp,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Backend returned status ${response.status}`);
+      }
+
+      const result = await response.json();
+      alert(result.summary_text || 'Submitted successfully', 'success');
+
+      button.disabled = true;
+      button.textContent = 'Done';
+      button.style.background = "grey";
+
+    } catch (err) {
+      console.error(err);
+      alert('Error submitting: ' + err.message, 'error');
+      button.disabled = false;
+      button.textContent = 'Create Audit Logs';
+    }
+  });
+
+  // 5. Inject the button into the target element
+  targetParentElement.appendChild(button);
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -99,8 +158,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
-  if (request.action === 'RESCAN_FIELDS') {
-    sendResponse({ values: rescanFieldValues() });
+  // if (request.action === 'RESCAN_FIELDS') {
+  //   sendResponse({ values: rescanFieldValues() });
+  //   return true;
+  // }
+
+  if (request.action === 'INJECT_BUTTON') {
+    injectButton(request.data);
+    sendResponse({ success: true });
     return true;
   }
 });

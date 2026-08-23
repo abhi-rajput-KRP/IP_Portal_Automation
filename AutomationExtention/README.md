@@ -34,17 +34,18 @@ sequenceDiagram
     DOM-->>Content: Apply color coding (#e6ffe6, #eec890, #ee9090)
     Content-->>Popup: Return fill statistics
     
+    Popup->>Content: chrome.tabs.sendMessage("INJECT_BUTTON")
+    Content->>DOM: Inject "Create Audit Logs" button
+    
     Note over Faculty,DOM: Faculty inspects and adjusts values directly in the web portal
     
-    Faculty->>Popup: Click "Create Final Logs"
-    Popup->>Content: chrome.tabs.sendMessage("RESCAN_FIELDS")
+    Faculty->>DOM: Click "Create Audit Logs" button
     Content->>DOM: Extract latest input values
     DOM-->>Content: Return current form state
-    Content-->>Popup: Final field values payload
     
-    Popup->>Backend: POST /api/resume-workflow (thread_id + final_values)
-    Backend-->>Popup: Workflow finalized & audit logged
-    Popup-->>Faculty: Display submission confirmation
+    Content->>Backend: POST /api/resume-workflow (thread_id + final_values)
+    Backend-->>Content: Workflow finalized & audit logged
+    Content-->>Faculty: Alert submission confirmation
 ```
 
 ---
@@ -53,7 +54,7 @@ sequenceDiagram
 
 ### 1. Two-Stage Execution Lifecycle
 - **Stage 1 (Match and Fill)**: Ingests spreadsheet data, extracts target DOM elements from the live page, executes backend matching, and populates the table with visual status indicators.
-- **Stage 2 (Rescan and Audit)**: After the user reviews and manually corrects any flagged entries in the browser, the extension rescans current DOM input values and sends them to the backend to complete the audit run in PostgreSQL.
+- **Stage 2 (Rescan and Audit)**: After the user reviews and manually corrects any flagged entries in the browser, they click the injected "Create Audit Logs" button on the web page. The extension then rescans current DOM input values and sends them directly from the web page to the backend to complete the audit run in PostgreSQL.
 
 ### 2. React SPA Event Dispatching
 Standard DOM assignments such as `element.value = newValue` fail in modern Single-Page Applications because React tracks input state using internal fiber descriptors. The extension bypasses this limitation by accessing the native HTMLInputElement setter and dispatching bubbling synthetic events:
@@ -148,7 +149,7 @@ The ingestion engine automatically recognizes varied column header naming conven
 4. Verify the detected record count and click **Fill Records**.
 5. Observe the automated field population and color coding on the active page.
 6. Make any manual corrections on flagged or empty fields directly on the portal page.
-7. Return to the popup and click **Create Final Logs** to record the completed run in the backend audit database.
+7. Click the injected **Create Audit Logs** button on the portal page to record the completed run in the backend audit database.
 8. Submit the marks on the portal page.
 
 ---

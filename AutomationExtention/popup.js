@@ -116,11 +116,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         `✓ ${fillResp.filledCount}/${fillResp.total} filled — ${result.summary_text || ''}`,
         'success'
       );
-
-      // switch the button into "stage 2" mode
-      btnFill.disabled = false;
-      btnFill.textContent = 'Create Final Logs';
-      btnFill.onclick = () => confirmAndSubmit(tab.id);
+      await sendMessageToTab(tab.id, { action: 'INJECT_BUTTON', data:currentThreadId });
+      btnFill.innerText = "Done"
 
     } catch (err) {
       console.error(err);
@@ -128,41 +125,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       btnFill.disabled = false;
       btnFill.innerHTML = `<span>⚡</span> Fill Records`;
       btnFill.onclick = runWorkflow;
-    }
-  }
-
-  // ---------- Stage 2: rescan + resume + submit ----------
-  async function confirmAndSubmit(tabId) {
-    btnFill.disabled = true;
-    btnFill.textContent = 'Logging...';
-
-    try {
-      const rescanResp = await sendMessageToTab(tabId, { action: 'RESCAN_FIELDS' });
-
-      const response = await fetch(`${BACKEND_URL}/api/resume-workflow`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          thread_id: currentThreadId,
-          final_field_values: rescanResp.values,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Backend returned status ${response.status}`);
-      }
-
-      const result = await response.json();
-      showStatus(result.summary_text || 'Submitted successfully', 'success');
-
-      btnFill.textContent = 'Done';
-      btnFill.disabled = true;
-
-    } catch (err) {
-      console.error(err);
-      showStatus('Error submitting: ' + err.message, 'error');
-      btnFill.disabled = false;
-      btnFill.textContent = 'Review & Submit';
     }
   }
 
