@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnFill = document.getElementById('btn-fill');
   const statusMsg = document.getElementById('status-msg');
 
-  const BACKEND_URL = 'http://127.0.0.1:8000';
+  // const BACKEND_URL = 'http://127.0.0.1:8000';
+  const BACKEND_URL = 'https://ip-portal-automation.onrender.com';
   const PORTAL_URL_PREFIX = 'https://ip-portal-automation.vercel.app/students';
 
   let parsedData = [];
