@@ -1,13 +1,17 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const body = document.querySelector("body");
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
   if (!tab || !tab.id) {
     body.innerHTML = `<div>No tab open</div>`;
+    return;
   }
-  else if (!tab.url || !tab.url.startsWith('https://ip-portal-automation.vercel.app/students')) {
+  if (!tab.url || !tab.url.startsWith('https://ip-portal-automation.vercel.app/students')) {
     body.innerHTML = `<div>Please open https://ip-portal-automation.vercel.app/students</div>`;
+    return;
   }
-  const fileInput = document.getElementById('excel-file-input');
+
+  const fileInput = document.getElementById('file-input');
   const dropZone = document.getElementById('drop-zone');
   const fileInfo = document.getElementById('file-info');
   const fileNameEl = document.getElementById('file-name');
@@ -15,11 +19,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnFill = document.getElementById('btn-fill');
   const statusMsg = document.getElementById('status-msg');
 
-  // const BACKEND_URL = 'http://127.0.0.1:8000';
-  const BACKEND_URL = 'https://ip-portal-automation.onrender.com';
+  const BACKEND_URL = 'https://ip-portal-automation.onrender.com'; //'https://scaling-pancake-jjwq499w4v6j2q79g-8000.app.github.dev';
   const PORTAL_URL_PREFIX = 'https://ip-portal-automation.vercel.app/students';
 
-  let parsedData = [];
+
+  let parsedData = [];       // used for excel/csv path
+  let selectedImageFile = null; // used for image path
+  let currentInputType = null;  // 'excel' | 'image'
   let currentThreadId = null;
 
   // ---------- Drag and drop visual handling ----------
@@ -50,10 +56,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // ---------- Parse the uploaded Excel/CSV file ----------
+  // ---------- Detect file type and route to the right handler ----------
   async function handleFile(file) {
+    const name = file.name.toLowerCase();
+    const isExcel = name.endsWith('.xlsx') || name.endsWith('.xls') || name.endsWith('.csv');
+    const isImage = file.type.startsWith('image/');
+
+    if (isExcel) {
+      await handleExcelFile(file);
+    } else if (isImage) {
+      handleImageFile(file);
+    } else {
+      showStatus('Unsupported file type. Upload Excel, CSV, or an image.', 'error');
+    }
+  }
+
+  // ---------- Parse Excel/CSV client-side ----------
+  async function handleExcelFile(file) {
     try {
       showStatus('', '');
+      currentInputType = 'excel';
       fileNameEl.textContent = file.name;
 
       const buffer = await file.arrayBuffer();
@@ -61,23 +83,37 @@ document.addEventListener('DOMContentLoaded', async () => {
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
 
-      // defval: '' ensures every row has every column key, even if the cell is empty
       parsedData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
 
       fileMetaEl.textContent = `${parsedData.length} records found in "${firstSheetName}"`;
       fileInfo.style.display = 'block';
       btnFill.disabled = false;
       btnFill.innerHTML = `<span>⚡</span> Fill Records`;
-      btnFill.onclick = runWorkflow; // make sure click always points to the first-stage function
+      btnFill.onclick = runWorkflow;
     } catch (err) {
       console.error('Error parsing file:', err);
       showStatus('Failed to read Excel/CSV file', 'error');
     }
   }
 
+  // ---------- Register image file, no client-side parsing needed ----------
+  function handleImageFile(file) {
+    showStatus('', '');
+    currentInputType = 'image';
+    selectedImageFile = file;
+    fileNameEl.textContent = file.name;
+    fileMetaEl.textContent = 'Scanned mark sheet ready to process';
+    fileInfo.style.display = 'block';
+    btnFill.disabled = false;
+    btnFill.innerHTML = `<span>⚡</span> Fill Records`;
+    btnFill.onclick = runWorkflow;
+  }
+
   // ---------- Stage 1: match + fill (talks to backend) ----------
   async function runWorkflow() {
-    if (parsedData.length === 0) return;
+    if (currentInputType === 'excel' && parsedData.length === 0) return;
+    if (currentInputType === 'image' && !selectedImageFile) return;
+    if (!currentInputType) return;
 
     btnFill.disabled = true;
     btnFill.textContent = 'Matching...';
@@ -89,15 +125,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       const scrapeResp = await sendMessageToTab(tab.id, { action: 'SCRAPE_PORTAL_TABLE' });
       const portalStudents = (scrapeResp && scrapeResp.students) || [];
 
-      // 2. Send parsed Excel rows + portal students to the Python backend
+      // 2. Build request based on input type
+      const formData = new FormData();
+      formData.append('input_type', currentInputType);
+      formData.append('portal_students', JSON.stringify(portalStudents));
+
+      if (currentInputType === 'excel') {
+        formData.append('records', JSON.stringify(parsedData));
+      } else {
+        formData.append('image', selectedImageFile);
+      }
+
       const response = await fetch(`${BACKEND_URL}/api/run-workflow`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          input_type: 'excel',
-          records: parsedData,
-          portal_students: portalStudents,
-        }),
+        body: formData, // no Content-Type header — browser sets multipart boundary automatically
       });
 
       if (!response.ok) {
@@ -117,8 +158,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         `✓ ${fillResp.filledCount}/${fillResp.total} filled — ${result.summary_text || ''}`,
         'success'
       );
-      await sendMessageToTab(tab.id, { action: 'INJECT_BUTTON', data:currentThreadId });
-      btnFill.innerText = "Done"
+      await sendMessageToTab(tab.id, { action: 'INJECT_BUTTON', data: currentThreadId });
+      btnFill.innerText = "Done";
 
     } catch (err) {
       console.error(err);
