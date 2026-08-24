@@ -1,2 +1,3 @@
 testing_scripts
 .gitignore
+.env

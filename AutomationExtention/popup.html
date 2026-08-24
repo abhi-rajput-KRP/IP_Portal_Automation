@@ -171,6 +171,21 @@
       border: 1px solid rgba(239, 68, 68, 0.3);
       display: block;
     }
+    .component-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .component-row input {
+      flex: 1;
+      min-width: 0;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      border-radius: 4px;
+      padding: 5px 6px;
+      font-size: 11px;
+    }
   </style>
   <script src="xlsx.full.min.js"></script>
 </head>
@@ -198,6 +213,23 @@
   <div class="file-info" id="file-info">
     <div class="file-name" id="file-name">filename.xlsx</div>
     <div class="file-meta" id="file-meta">0 rows loaded</div>
+  </div>
+
+  <!-- Weightage toggle -->
+  <div class="weightage-toggle" id="weightage-toggle" style="display:none; margin-top:10px;">
+    <label style="font-size:11px; color:#e2e8f0; display:flex; align-items:center; gap:6px;">
+      <input type="checkbox" id="use-weightage-checkbox" />
+      This file has multiple mark components (combine with weightage)
+    </label>
+  </div>
+
+  <!-- Weightage config form -->
+  <div class="weightage-form" id="weightage-form" style="display:none; margin-top:10px; background:#1e293b; border:1px solid #334155; border-radius:8px; padding:10px;">
+    <div id="components-container"></div>
+
+    <button type="button" id="btn-add-component" class="btn" style="background:#334155; margin-top:6px; padding:6px;">
+      + Add component
+    </button>
   </div>
 
   <!-- Action Button -->

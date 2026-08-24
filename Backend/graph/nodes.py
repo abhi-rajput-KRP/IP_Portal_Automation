@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from rapidfuzz import fuzz
 import base64
 from langchain_core.messages import HumanMessage
+from typing import TypedDict, Literal, Optional, List, Dict
 from langgraph.types import interrupt
 from graph.prompts import build_prompt, OCR_prompt
 from graph.schemas import WorkflowState, LLMClassificationList
@@ -16,6 +17,11 @@ from dotenv import load_dotenv
 # Setting up Neon-Postgres DB
 load_dotenv()
 db_url = os.getenv("DATABASE_URL")
+
+class MarksSourceConfig(TypedDict):
+    file_label: str        # "quiz", "assignment", "midterm" — faculty's own naming
+    max_marks: float        # e.g., 10 for quiz, 20 for assignment
+    weightage: float 
 
 
 def ingest_input(state: WorkflowState) -> dict:
@@ -31,6 +37,7 @@ COLUMN_ALIASES = {
 
 def parse_excel(state: WorkflowState) -> dict:
     raw_rows = state["raw_records"]  
+    weightage_config = state.get("weightage_config")
     parse_errors = []
     records = []
     seen_enrolment_nos = {}
@@ -40,7 +47,7 @@ def parse_excel(state: WorkflowState) -> dict:
 
         enrolment_no = clean_enrolment_no(normalized_row.get("enrolment_no"))
         name = clean_name(normalized_row.get("name"))
-        value = normalized_row.get("value")
+        
 
         if not enrolment_no and not name:
             continue  
@@ -62,12 +69,22 @@ def parse_excel(state: WorkflowState) -> dict:
             continue
 
         seen_enrolment_nos[enrolment_no] = idx + 2
-        records.append({
-            "enrolment_no": enrolment_no,
-            "name": name,
-            "value": value.strip() if isinstance(value, str) else value,
-            "source_row": idx + 2,
-        })
+        if not weightage_config:
+            value = normalized_row.get("value")
+            records.append({
+                "enrolment_no": enrolment_no,
+                "name": name,
+                "value": value.strip() if isinstance(value, str) else value,
+                "source_row": idx + 2,
+            })
+        else:
+            result = compute_weighted_marks(row, weightage_config)
+            records.append({
+                "enrolment_no": enrolment_no,
+                "name": name,
+                "value": result["value"],
+                "source_row": idx + 2,
+            })
 
     return {
         "raw_records": records,
@@ -106,6 +123,24 @@ def clean_name(value) -> str:
     if value is None or value == "":
         return ""
     return " ".join(str(value).strip().split())
+
+
+def compute_weighted_marks(raw_row: dict, config: list[dict]) -> dict:
+    raw_lookup = {k.strip().lower(): v for k, v in raw_row.items()}
+
+    total = 0.0
+
+    for source in config:
+        col_key = source["column_name"].strip().lower()
+        if raw_lookup.get(col_key):
+            raw_value = raw_lookup.get(col_key)
+        else:
+            raw_value= 0
+
+        weighted = raw_value*source["weightage"]*100
+        total += weighted
+
+    return {"status": "valid", "value": round(total, 2)}
 
 def encode_image(image_path):
     with open(image_path, "rb") as f:

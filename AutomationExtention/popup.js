@@ -11,6 +11,61 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  const weightageToggle = document.getElementById('weightage-toggle');
+  const weightageCheckbox = document.getElementById('use-weightage-checkbox');
+  const weightageForm = document.getElementById('weightage-form');
+  const componentsContainer = document.getElementById('components-container');
+  const btnAddComponent = document.getElementById('btn-add-component');
+  
+  let detectedColumns = [];
+
+  weightageCheckbox.addEventListener('change', (e) => {
+    weightageForm.style.display = e.target.checked ? 'block' : 'none';
+    if (e.target.checked && componentsContainer.children.length === 0) {
+      addComponentRow();
+      addComponentRow();
+    }
+  });
+
+  btnAddComponent.addEventListener('click', addComponentRow);
+
+  function addComponentRow() {
+    const row = document.createElement('div');
+    row.className = 'component-row';
+
+    let colInputHtml;
+    if (detectedColumns.length > 0) {
+      const options = detectedColumns.map(c => `<option value="${c}">${c}</option>`).join('');
+      colInputHtml = `<select class="col-name">${options}</select>`;
+    } else {
+      colInputHtml = `<input type="text" placeholder="Column name" class="col-name" />`;
+    }
+
+    row.innerHTML = `
+      ${colInputHtml}
+      <input type="number" placeholder="Max" class="col-max" style="max-width:50px;" />
+      <input type="number" placeholder="Wt %" class="col-weight" style="max-width:55px;" />
+    `;
+    componentsContainer.appendChild(row);
+  }
+
+  function collectWeightageConfig() {
+    if (!weightageCheckbox.checked) return null;
+
+    const rows = document.querySelectorAll('.component-row');
+    const config = Array.from(rows).map(row => ({
+      column_name: row.querySelector('.col-name').value.trim(),
+      max_marks: parseFloat(row.querySelector('.col-max').value),
+      weightage: parseFloat(row.querySelector('.col-weight').value) / 100,
+    }));
+
+    if (config.some(c => !c.column_name || !c.max_marks)) {
+      showStatus('Please fill in every component row', 'error');
+      return undefined;
+    }
+    return config;
+  }
+
   const fileInput = document.getElementById('file-input');
   const dropZone = document.getElementById('drop-zone');
   const fileInfo = document.getElementById('file-info');
@@ -87,6 +142,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       fileMetaEl.textContent = `${parsedData.length} records found in "${firstSheetName}"`;
       fileInfo.style.display = 'block';
+      //-------
+      detectedColumns = parsedData.length > 0 ? Object.keys(parsedData[0]) : [];
+      weightageToggle.style.display = 'block';
+      //------
       btnFill.disabled = false;
       btnFill.innerHTML = `<span>⚡</span> Fill Records`;
       btnFill.onclick = runWorkflow;
@@ -104,6 +163,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     fileNameEl.textContent = file.name;
     fileMetaEl.textContent = 'Scanned mark sheet ready to process';
     fileInfo.style.display = 'block';
+    //-------
+    weightageToggle.style.display = 'none';
+    weightageForm.style.display = 'none';
+    weightageCheckbox.checked = false;
+    //-------
     btnFill.disabled = false;
     btnFill.innerHTML = `<span>⚡</span> Fill Records`;
     btnFill.onclick = runWorkflow;
@@ -114,6 +178,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (currentInputType === 'excel' && parsedData.length === 0) return;
     if (currentInputType === 'image' && !selectedImageFile) return;
     if (!currentInputType) return;
+
+    const weightageConfig = collectWeightageConfig();
+    if (weightageConfig === undefined) return; 
 
     btnFill.disabled = true;
     btnFill.textContent = 'Matching...';
@@ -129,7 +196,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const formData = new FormData();
       formData.append('input_type', currentInputType);
       formData.append('portal_students', JSON.stringify(portalStudents));
-
+      //-----------
+      if (weightageConfig) {
+        formData.append('weightage_config', JSON.stringify(weightageConfig));
+      }
+      //-----------
       if (currentInputType === 'excel') {
         formData.append('records', JSON.stringify(parsedData));
       } else {

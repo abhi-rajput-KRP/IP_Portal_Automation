@@ -56,7 +56,8 @@ async def run_workflow(
     input_type: str = Form(...),
     records: str = Form(None),           # JSON string of parsed Excel rows, for excel path
     portal_students: str = Form(...),     # JSON string, always required
-    image: UploadFile = File(None),       # only present for image path
+    image: UploadFile = File(None),  
+    weightage_config: str = Form(None)     # only present for image path
 ):
     thread_id = str(uuid.uuid4())
     config = {"configurable": {"thread_id": thread_id}}
@@ -65,6 +66,7 @@ async def run_workflow(
         "thread_id": thread_id,
         "input_type": input_type,
         "portal_students": json.loads(portal_students),
+        "weightage_config": json.loads(weightage_config) if weightage_config else None
     }
 
     if input_type == "excel":

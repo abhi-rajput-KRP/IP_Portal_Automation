@@ -1,5 +1,5 @@
 from typing import TypedDict, Literal, Optional, List, Dict
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class FieldRecord(TypedDict):
     enrolment_no: str
@@ -17,7 +17,8 @@ class WorkflowState(TypedDict):
     image_path: str
     records:List[Dict]
     raw_records: list          
-    portal_students: List[Dict]     
+    portal_students: List[Dict]    
+    weightage_config: Optional[list[dict]] = Field(None)
     matched: list
     ambiguous: list
     unresolved: list
