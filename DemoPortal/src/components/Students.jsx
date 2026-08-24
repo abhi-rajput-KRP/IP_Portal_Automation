@@ -101,7 +101,7 @@ export default function Students() {
                                     Semester
                                 </th>
                                 <th scope="col" className="px-6 py-3 font-medium">
-                                    Enlorrment Number
+                                    Enrollment Number
                                 </th>
                                 <th scope="col" className="px-6 py-3 font-medium">
                                     Name
