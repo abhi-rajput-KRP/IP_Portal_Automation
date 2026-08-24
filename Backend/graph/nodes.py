@@ -226,7 +226,7 @@ def fuzzy_match(state: WorkflowState) -> dict:
 def llm_resolve_ambiguous(state: WorkflowState) -> dict:
     if not state["ambiguous"]:
         return {}
-    test_ambiguous = state["ambiguous"][:2]
+    test_ambiguous = state["ambiguous"]
     resolved, unresolved = call_llm_batch(test_ambiguous, state["portal_students"])
     return {
         "matched": state["matched"] + resolved,
