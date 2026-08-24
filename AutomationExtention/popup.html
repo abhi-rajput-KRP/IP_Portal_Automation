@@ -13,57 +13,60 @@
 
     body {
       width: 320px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #0f172a;
-      color: #f8fafc;
-      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #ffffff;
+      color: #334155;
+      padding: 20px;
     }
 
     .header {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 14px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #1e293b;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
     }
 
     .header-icon {
-      width: 28px;
-      height: 28px;
-      background: linear-gradient(135deg, #6366f1, #3b82f6);
-      border-radius: 6px;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 18px;
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
     }
 
     .header h1 {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 600;
-      color: #ffffff;
+      color: #1e293b;
     }
 
     .header p {
-      font-size: 11px;
-      color: #94a3b8;
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
     }
 
     .upload-box {
-      border: 2px dashed #334155;
-      border-radius: 8px;
-      padding: 20px 12px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 24px 16px;
       text-align: center;
-      background: #1e293b;
+      background: #f8fafc;
       cursor: pointer;
       transition: all 0.2s ease;
       position: relative;
     }
 
     .upload-box:hover, .upload-box.dragover {
-      border-color: #6366f1;
-      background: rgba(99, 102, 241, 0.08);
+      border-color: #2563eb;
+      background: #eff6ff;
     }
 
     .upload-box input[type="file"] {
@@ -77,114 +80,173 @@
     }
 
     .upload-icon {
-      font-size: 24px;
-      margin-bottom: 6px;
+      font-size: 28px;
+      margin-bottom: 8px;
     }
 
     .upload-text {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
-      color: #e2e8f0;
+      color: #475569;
     }
 
     .upload-text span {
-      color: #818cf8;
-      text-decoration: underline;
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
     }
 
     .upload-hint {
-      font-size: 10px;
-      color: #64748b;
-      margin-top: 2px;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 6px;
     }
 
     .file-info {
       display: none;
-      margin-top: 12px;
-      background: #1e293b;
-      border: 1px solid #334155;
+      margin-top: 16px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
     .file-name {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
-      color: #38bdf8;
+      color: #1e40af;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .file-meta {
-      font-size: 11px;
-      color: #94a3b8;
-      margin-top: 2px;
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
     }
 
     .btn {
       width: 100%;
-      margin-top: 12px;
-      padding: 10px;
-      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      margin-top: 16px;
+      padding: 12px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
       color: white;
       border: none;
-      border-radius: 6px;
-      font-size: 12px;
+      border-radius: 8px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
     }
 
-    .btn:hover {
-      background: linear-gradient(135deg, #4f46e5, #4338ca);
+    .btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #1d4ed8, #1e40af);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
     }
 
     .btn:disabled {
-      opacity: 0.5;
+      background: #cbd5e1;
+      color: #94a3b8;
       cursor: not-allowed;
+      box-shadow: none;
     }
 
     .status-msg {
-      margin-top: 10px;
-      font-size: 11px;
+      margin-top: 12px;
+      font-size: 12px;
       text-align: center;
-      padding: 6px;
-      border-radius: 4px;
+      padding: 8px;
+      border-radius: 6px;
       display: none;
+      font-weight: 500;
     }
 
     .status-msg.success {
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
       display: block;
     }
 
     .status-msg.error {
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
       display: block;
     }
+
     .component-row {
       display: flex;
-      gap: 6px;
-      margin-bottom: 6px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
+    
     .component-row input {
       flex: 1;
       min-width: 0;
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: #f8fafc;
-      border-radius: 4px;
-      padding: 5px 6px;
-      font-size: 11px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 12px;
+      transition: border-color 0.2s ease;
+    }
+
+    .component-row input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+
+    .weightage-toggle {
+      margin-top: 12px;
+    }
+
+    .weightage-toggle label {
+      font-size: 12px;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .weightage-toggle input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: #2563eb;
+    }
+
+    .weightage-form {
+      margin-top: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    #btn-add-component {
+      background: #f1f5f9;
+      color: #475569;
+      box-shadow: none;
+      border: 1px dashed #cbd5e1;
+      padding: 8px;
+      margin-top: 8px;
+    }
+
+    #btn-add-component:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+      transform: none;
     }
   </style>
   <script src="xlsx.full.min.js"></script>
@@ -216,18 +278,18 @@
   </div>
 
   <!-- Weightage toggle -->
-  <div class="weightage-toggle" id="weightage-toggle" style="display:none; margin-top:10px;">
-    <label style="font-size:11px; color:#e2e8f0; display:flex; align-items:center; gap:6px;">
+  <div class="weightage-toggle" id="weightage-toggle" style="display:none;">
+    <label>
       <input type="checkbox" id="use-weightage-checkbox" />
       This file has multiple mark components (combine with weightage)
     </label>
   </div>
 
   <!-- Weightage config form -->
-  <div class="weightage-form" id="weightage-form" style="display:none; margin-top:10px; background:#1e293b; border:1px solid #334155; border-radius:8px; padding:10px;">
+  <div class="weightage-form" id="weightage-form" style="display:none;">
     <div id="components-container"></div>
 
-    <button type="button" id="btn-add-component" class="btn" style="background:#334155; margin-top:6px; padding:6px;">
+    <button type="button" id="btn-add-component" class="btn">
       + Add component
     </button>
   </div>

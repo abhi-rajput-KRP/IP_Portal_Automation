@@ -39,18 +39,6 @@ def health_check():
 #         "summary_text": result.get("summary_text", ""),
 #     }
 
-# @app.post("/api/resume-workflow")
-# async def resume_workflow(payload: dict):
-#     config = {"configurable": {"thread_id": payload["thread_id"]}}
-#     result = graph.invoke(
-#         Command(resume={"final_field_values": payload["final_field_values"]}),
-#         config=config,
-#     )
-#     return {
-#         "status": "submitted",
-#         "summary_text": result.get("summary_text", ""),
-#     }
-
 @app.post("/api/run-workflow")
 async def run_workflow(
     input_type: str = Form(...),
@@ -91,5 +79,17 @@ async def run_workflow(
     return {
         "thread_id": thread_id,
         "field_instructions": result.get("field_instructions", []),
+        "summary_text": result.get("summary_text", ""),
+    }
+
+@app.post("/api/resume-workflow")
+async def resume_workflow(payload: dict):
+    config = {"configurable": {"thread_id": payload["thread_id"]}}
+    result = graph.invoke(
+        Command(resume={"final_field_values": payload["final_field_values"]}),
+        config=config,
+    )
+    return {
+        "status": "submitted",
         "summary_text": result.get("summary_text", ""),
     }

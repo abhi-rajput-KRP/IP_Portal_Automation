@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     body.innerHTML = `<div>No tab open</div>`;
     return;
   }
-  if (!tab.url || !tab.url.startsWith('https://ip-portal-automation.vercel.app/students')) {
-    body.innerHTML = `<div>Please open https://ip-portal-automation.vercel.app/students</div>`;
+  if (!tab.url || !tab.url.startsWith('http://localhost:5173/students')) {
+    body.innerHTML = `<div style="color:red;text-align:center;font-size:14px;margin:auto">Please open http://localhost:5173/students</div>`;
     return;
   }
 
@@ -74,13 +74,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnFill = document.getElementById('btn-fill');
   const statusMsg = document.getElementById('status-msg');
 
-  const BACKEND_URL = 'https://ip-portal-automation.onrender.com'; //'https://scaling-pancake-jjwq499w4v6j2q79g-8000.app.github.dev';
-  const PORTAL_URL_PREFIX = 'https://ip-portal-automation.vercel.app/students';
+  const BACKEND_URL = 'http://127.0.0.1:8000';
 
-
-  let parsedData = [];       // used for excel/csv path
-  let selectedImageFile = null; // used for image path
-  let currentInputType = null;  // 'excel' | 'image'
+  let parsedData = [];
+  let selectedImageFile = null;
+  let currentInputType = null;
   let currentThreadId = null;
 
   // ---------- Drag and drop visual handling ----------
@@ -209,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const response = await fetch(`${BACKEND_URL}/api/run-workflow`, {
         method: 'POST',
-        body: formData, // no Content-Type header — browser sets multipart boundary automatically
+        body: formData,
       });
 
       if (!response.ok) {
@@ -218,8 +216,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const result = await response.json();
       currentThreadId = result.thread_id;
-
-      // 3. Send field_instructions to content.js to actually fill/annotate the DOM
       const fillResp = await sendMessageToTab(tab.id, {
         action: 'APPLY_FIELD_INSTRUCTIONS',
         data: result.field_instructions,

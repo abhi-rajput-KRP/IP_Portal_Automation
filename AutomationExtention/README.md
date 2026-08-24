@@ -122,8 +122,7 @@ The ingestion engine automatically recognizes varied column header naming conven
 
 ### 1. Prerequisites
 - A Chromium-based browser (Google Chrome, Microsoft Edge, Brave, or Chromium).
-- Backend service running locally on `http://127.0.0.1:8000`. (If running FastAPI Server locally)
-- Deployed Backend service running on `https://ip-portal-automation.onrender.com`. (if using deployed Backend)
+- Backend service running locally on `http://127.0.0.1:8000`.
 
 ### 2. Load the Unpacked Extension
 1. Open the browser and navigate to the extensions management console:
@@ -143,7 +142,7 @@ The ingestion engine automatically recognizes varied column header naming conven
 
 1. Navigate to the marks evaluation page on the portal:
    ```text
-   https://ip-portal-automation.vercel.app/students?sem=1
+   http://localhost:5173/students?sem=1
    ```
 2. Click the extension icon in the toolbar to open the popup interface.
 3. Drag and drop the Excel (`.xlsx`, `.xls`) or CSV file into the upload dropzone.
@@ -157,7 +156,7 @@ The ingestion engine automatically recognizes varied column header naming conven
 
 ## Troubleshooting
 
-- **"Please open https://ip-portal-automation.vercel.app/students"**: Ensure the current browser tab is on the active students evaluation page before opening the extension popup.
+- **"Please open http://localhost:5173/students"**: Ensure the current browser tab is on the active students evaluation page before opening the extension popup.
 - **"Could not communicate with tab"**: Refresh the portal web page after loading or updating the extension to ensure the content script is actively injected into the page DOM.
 - **"Error running workflow: Backend returned status..."**: Verify that the Python backend service is actively running on `http://127.0.0.1:8000` with the appropriate virtual environment and dependencies.
 - **Unmatched Rows**: Check that spreadsheet columns match one of the supported header alias conventions and that marks values are within the allowable range (0 to 40).

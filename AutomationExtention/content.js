@@ -48,7 +48,6 @@ function scrapePortalStudents() {
     const name = cells[3] ? cells[3].innerText.trim() : '';
     if (!enrolment_no) return;
 
-    // ALWAYS assign our own safe, predictable id — don't trust/reuse the portal's existing one
     input.id = `agent-field-${idx}`;
 
     students.push({ enrolment_no, name, field_selector: `#${input.id}` });
@@ -80,18 +79,13 @@ function applyFieldInstructions(instructions) {
 // --- Rescan current field values before final submit ---
 
 async function injectButton(threadid) {
-  // Function to handle the injection
   const targetParentElement = document.body;
-
-  // Prevent duplicate injections if the script runs multiple times
   if (document.getElementById('my-extension-btn')) return;
 
-  // 2. Create the button element
   const button = document.createElement('button');
   button.id = 'my-extension-btn';
   button.innerText = 'Create Audit Logs';
 
-  // 3. Style the button (optional)
   button.style.background = "linear-gradient(135deg, #6366f1, #4f46e5)";
   button.style.color = '#ffffff';
   button.style.padding = '10px 10px';
@@ -101,8 +95,8 @@ async function injectButton(threadid) {
   button.style.bottom = '20px';
   button.style.borderRadius = '5px';
   button.style.cursor = 'pointer';
+  button.style.zIndex = '9999';
 
-  // 4. Add functionality via an event listener
   button.addEventListener('click', async () => {
     button.disabled = true;
     button.textContent = 'Logging...';
@@ -113,8 +107,7 @@ async function injectButton(threadid) {
         field_selector: `#${el.id}`,
         value: el.value,
       }));
-      // const BACKEND_URL = 'http://127.0.0.1:8000';
-      const BACKEND_URL = 'https://ip-portal-automation.onrender.com';
+      const BACKEND_URL = 'http://127.0.0.1:8000';
       const response = await fetch(`${BACKEND_URL}/api/resume-workflow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

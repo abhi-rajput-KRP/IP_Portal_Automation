@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "TableAutoFill - Excel & CSV Web Form Autofiller",
+  "name": "TableAutoFill - IP Portal Autofiller",
   "version": "1.0.0",
-  "description": "Smartly autofill inputs in webpage tables by matching records from uploaded Excel or CSV files.",
+  "description": "Smartly autofill inputs in webpage tables by matching records from uploaded Excel, CSV files or image files.",
   "permissions": [
     "activeTab",
     "scripting",
     "storage"
   ],
   "host_permissions": [
-    "https://ip-portal-automation.vercel.app/students*"
+    "http://localhost:5173/students*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -28,7 +28,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://ip-portal-automation.vercel.app/students*"
+        "http://localhost:5173/students*"
       ],
       "js": [
         "content.js"
