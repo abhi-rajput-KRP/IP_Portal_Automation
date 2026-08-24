@@ -11,6 +11,8 @@ export default function Students() {
     const [loading, setLoading] = useState(true);
     const [searchParams] = useSearchParams();
     const sem = Number(searchParams.get('sem'));
+    const [students, setstudents] = useState([]);
+    const [initialStudents, seteinitialstudents] = useState([]);
     useEffect(() => {
         checklogin().then((resp) => {
             if (!resp) {
@@ -18,23 +20,26 @@ export default function Students() {
             }
         })
     }, [navigate]);
-    const [students, setstudents] = useState([])
 
     useEffect(() => {
         let items = getItems(sem);
         items.then((data) => {
             console.log("Fetched data from database");
             setstudents(data);
+            seteinitialstudents(data);
             setLoading(false);
         });
     }, [])
 
     function HandelSubmit() {
         students.map((data) => {
-            // console.log(data.id, data.marks);
-            if (Number(data.marks) !== 0) {
-                updateStudentMarks(data.id, data.marks);
-            }
+            initialStudents.forEach((value)=>{
+                if(data.id === value.id){
+                    if (Number(data.marks) !== Number(value.marks)) {
+                        updateStudentMarks(data.id, data.marks);
+                    }
+                }
+            })
         });
         alert("All marks uploaded !!")
     }
