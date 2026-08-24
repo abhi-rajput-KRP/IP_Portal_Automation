@@ -24,3 +24,16 @@ For each unmatched record, respond with a JSON array. Each element must have exa
 }}
 
 Respond with ONLY the JSON array. No preamble, no markdown formatting, no additional text."""
+
+OCR_prompt= """Extract the student records from this table image.
+
+CRITICAL: Respond with ONLY a raw JSON array. No explanation, no markdown, no code fences, no headers.
+Your entire response must start with [ and end with ].
+
+Format: [{"enrolment_no": "...", "name": "...", "marks": "..."}]
+
+Rules:
+- Absence markers (AB, Absent, blank, -) → use "AB" for marks
+- Illegible values → use ""
+- Preserve enrolment numbers exactly as shown, including leading zeros
+"""

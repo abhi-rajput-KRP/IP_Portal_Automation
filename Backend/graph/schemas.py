@@ -14,7 +14,7 @@ class FieldRecord(TypedDict):
 
 class WorkflowState(TypedDict):
     input_type: str
-    file_path: str
+    image_path: str
     records:List[Dict]
     raw_records: list          
     portal_students: List[Dict]     

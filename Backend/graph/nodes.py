@@ -2,10 +2,12 @@ import json
 import re
 from datetime import datetime, timezone
 from rapidfuzz import fuzz
+import base64
+from langchain_core.messages import HumanMessage
 from langgraph.types import interrupt
-from graph.prompts import build_prompt
+from graph.prompts import build_prompt, OCR_prompt
 from graph.schemas import WorkflowState, LLMClassificationList
-from config import llm
+from config import llm, vlm
 import time
 import os
 import psycopg
@@ -18,14 +20,14 @@ db_url = os.getenv("DATABASE_URL")
 
 def ingest_input(state: WorkflowState) -> dict:
     # decide branch based on input_type — set here, routing happens in conditional edge
-    # return {state }
-    pass
+    return {}
 
 COLUMN_ALIASES = {
     "enrolment_no": ["enrolment no", "enrolment number", "enrollment no","enrollment number", "roll no", "roll number", "enr no","enlorrment number"],
     "name": ["name", "student name", "full name"],
     "value": ["marks", "marks obtained", "internal marks", "score", "marks alloted", "marks allotted"],
 }
+
 
 def parse_excel(state: WorkflowState) -> dict:
     raw_rows = state["raw_records"]  
@@ -105,10 +107,71 @@ def clean_name(value) -> str:
         return ""
     return " ".join(str(value).strip().split())
 
+def encode_image(image_path):
+    with open(image_path, "rb") as f:
+        return base64.b64encode(f.read()).decode("utf-8")
+
+
 def ocr_extract(state: WorkflowState) -> dict:
-    # pytesseract / cloud OCR call
-    records = [...]
-    return {"raw_records": records}
+    image_path = state["image_path"]
+    base64_image = encode_image(image_path)
+
+    message = HumanMessage(
+        content=[
+            {"type": "text", "text": OCR_prompt},
+            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}},
+        ]
+    )
+
+    try:
+        result = vlm.invoke([message])
+        raw_text = result.content.strip()
+        raw_text = raw_text.replace("```json", "").replace("```", "").strip()
+        rows = json.loads(raw_text)
+    except Exception as e:
+        print(f"[OCR failed]: {type(e).__name__}: {e}")
+        return {"raw_records": [], "unresolved": state.get("unresolved", [])}
+
+    parse_errors = []
+    records = []
+    seen_enrolment_nos = {}
+
+    for idx, row in enumerate(rows):
+        enrolment_no = clean_enrolment_no(row.get("enrolment_no", ""))
+        name = clean_name(row.get("name", ""))
+        value = row.get("marks", "")
+
+        if not enrolment_no and not name:
+            continue
+        if not enrolment_no or not name:
+            parse_errors.append({
+                "row_number": idx + 1,
+                "reason": f"OCR could not read {'enrolment number' if not enrolment_no else 'name'}",
+                "raw_row": row,
+            })
+            continue
+        if enrolment_no in seen_enrolment_nos:
+            parse_errors.append({
+                "row_number": idx + 1,
+                "reason": f"Duplicate enrolment number '{enrolment_no}'",
+                "raw_row": row,
+            })
+            continue
+
+        seen_enrolment_nos[enrolment_no] = idx + 1
+        records.append({
+            "enrolment_no": enrolment_no,
+            "name": name,
+            "value": value.strip() if isinstance(value, str) else value,
+            "source_row": idx + 1,
+        })
+
+    return {
+        "raw_records": records,
+        "unresolved": state.get("unresolved", []) + [
+            {**e, "status": "parse_error"} for e in parse_errors
+        ],
+    }
 
 def deterministic_match(state: WorkflowState) -> dict:
     matched, leftover = [], []
@@ -345,6 +408,9 @@ def log_audit(state: WorkflowState) -> dict:
         print(f"Failed to connect to the database: {e}")
 
     return {} 
+
+def route_input(state: WorkflowState) -> str:
+    return "ocr_extract" if state["input_type"] == "image" else "parse_excel"
 
 def route_after_deterministic(state: WorkflowState) -> str:
     return "fuzzy_match" if state["ambiguous"] else "validate_marks"
