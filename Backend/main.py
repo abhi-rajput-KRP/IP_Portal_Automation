@@ -21,24 +21,6 @@ app.add_middleware(
 def health_check():
     return {"status": "alive"}
 
-# @app.post("/api/run-workflow")
-# async def run_workflow(payload: dict):
-#     thread_id = str(uuid.uuid4())
-#     config = {"configurable": {"thread_id": thread_id}}
-
-#     initial_state = {
-#         "input_type": payload["input_type"],
-#         "raw_records": payload["records"],
-#         "portal_students": payload["portal_students"],
-#     }
-#     result = graph.invoke(initial_state, config=config)
-
-#     return {
-#         "thread_id": thread_id,
-#         "field_instructions": result.get("field_instructions", []),
-#         "summary_text": result.get("summary_text", ""),
-#     }
-
 @app.post("/api/run-workflow")
 async def run_workflow(
     input_type: str = Form(...),

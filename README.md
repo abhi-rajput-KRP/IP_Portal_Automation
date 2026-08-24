@@ -61,7 +61,7 @@ flowchart TB
 ### 2. Browser Automation Extension (`AutomationExtention/`)
 - **Framework**: Chrome Extensions (Manifest V3), SheetJS (`xlsx.full.min.js`), Vanilla JavaScript.
 - **Core Role**: In-browser automation engine that bridges offline spreadsheets with the active portal page:
-  - **Offline Parsing**: Fast, secure parsing of `.xlsx`, `.xls`, and `.csv` files without external CDN dependencies.
+  - **Offline Parsing & Image Support**: Fast, secure parsing of `.xlsx`, `.xls`, and `.csv` files without external CDN dependencies, plus support for mark sheet image uploads.
   - **DOM Scraping & Unique Tagging**: Extracts live student rosters from table DOM elements and assigns deterministic identifiers.
   - **React SPA Reactivity**: Uses native input prototype descriptor setters and dispatches synthetic bubbling events (`input`, `change`, `blur`) to update React 18/19 internal state trackers.
   - **Visual Status Feedback**: Applies background color highlights on portal fields (`#e6ffe6` confirmed, `#eec890` flagged, `#ee9090` empty) with tooltip explanations.
@@ -83,7 +83,7 @@ flowchart TB
 1. **Authentication and Roster Selection**:
    Faculty signs into the Demo Portal, selects the target academic semester, and opens the student marks entry table.
 2. **Spreadsheet Ingestion**:
-   Faculty opens the IP Portal Autofill extension and uploads their local assessment spreadsheet (`.xlsx`, `.xls`, or `.csv`).
+   Faculty opens the IP Portal Autofill extension and uploads their local assessment spreadsheet (`.xlsx`, `.xls`, `.csv`) or a mark sheet image.
 3. **DOM Scraping and Matching Execution**:
    The extension scrapes the live student roster from the portal table and transmits both the uploaded records and the portal roster to the FastAPI backend (`POST /api/run-workflow`).
 4. **Multi-Stage Intelligence Pipeline**:

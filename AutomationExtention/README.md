@@ -17,7 +17,7 @@ sequenceDiagram
     participant DOM as Portal Page DOM
     participant Backend as FastAPI / LangGraph Backend
 
-    Faculty->>Popup: Upload Excel / CSV file
+    Faculty->>Popup: Upload Excel / CSV / Image file
     Popup->>Popup: Parse file with offline SheetJS
     Faculty->>Popup: Click "Fill Records"
     
@@ -112,7 +112,7 @@ The ingestion engine automatically recognizes varied column header naming conven
 
 | Field Identifier | Supported Header Aliases |
 | :--- | :--- |
-| **Enrollment Number** | `enrolment no`, `enrolment number`, `enrollment no`, `enrollment number`, `roll no`, `roll number`, `enr no`, `enlorrment number` |
+| **Enrollment Number** | `enrolment no`, `enrolment number`, `enrollment no`, `enrollment number`, `roll no`, `roll number`, `enr no` |
 | **Student Name** | `name`, `student name`, `full name` |
 | **Assessment Marks** | `marks`, `marks obtained`, `internal marks`, `score`, `marks alloted`, `marks allotted` |
 
@@ -145,7 +145,7 @@ The ingestion engine automatically recognizes varied column header naming conven
    http://localhost:5173/students?sem=1
    ```
 2. Click the extension icon in the toolbar to open the popup interface.
-3. Drag and drop the Excel (`.xlsx`, `.xls`) or CSV file into the upload dropzone.
+3. Drag and drop the Excel (`.xlsx`, `.xls`), CSV file, or image (photo/scan) into the upload dropzone.
 4. Verify the detected record count and click **Fill Records**.
 5. Observe the automated field population and color coding on the active page.
 6. Make any manual corrections on flagged or empty fields directly on the portal page.

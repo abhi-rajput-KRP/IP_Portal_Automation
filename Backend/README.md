@@ -109,18 +109,12 @@ Backend/
 ### Run Matching Workflow
 - **Endpoint**: `POST /api/run-workflow`
 - **Description**: Ingests spreadsheet records and live portal students, executes graph processing up to the review interrupt, and returns visual field instructions.
-- **Request Body**:
-  ```json
-  {
-    "input_type": "excel",
-    "records": [
-      { "Enrollment No": "00112345678", "Student Name": "John Doe", "Marks": 35 }
-    ],
-    "portal_students": [
-      { "enrolment_no": "00112345678", "name": "John Doe", "field_selector": "#agent-field-0" }
-    ]
-  }
-  ```
+- **Request Body** (`multipart/form-data`):
+  - `input_type` (string): e.g., `"excel"` or `"image"`
+  - `records` (stringified JSON, optional): Parsed Excel rows
+  - `portal_students` (stringified JSON, required): Roster scraped from the portal
+  - `image` (file, optional): Uploaded mark sheet image
+  - `weightage_config` (stringified JSON, optional): Weightage components configuration
 - **Response Body**:
   ```json
   {
