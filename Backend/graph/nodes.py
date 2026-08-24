@@ -303,7 +303,7 @@ def validate_marks(state: WorkflowState) -> dict:
         else:
             result["value"] = None
             result["validation_flag"] = "invalid"
-            result["validation_reason"] = normalized["reason"]
+            result["reason"] = normalized["reason"]
             validation_failures.append(result)
 
     return {
