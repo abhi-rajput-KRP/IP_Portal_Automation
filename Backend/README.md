@@ -193,6 +193,7 @@ DATABASE_URL=postgresql://user:password@host/database?sslmode=require
 
 - `GEMINI_API_KEY`: API key for Google Generative AI (Gemini / Gemma models).
 - `DATABASE_URL`: Connection string for PostgreSQL (e.g., Neon serverless PostgreSQL instance).
+- `FEATHERLESS_API_KEY`: = API key for Featherless AI.
 
 ---
 

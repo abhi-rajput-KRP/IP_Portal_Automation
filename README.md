@@ -30,7 +30,7 @@ flowchart TB
         Firebase[(Firebase - Auth & Firestore DB)]
     end
 
-    Faculty -->|Uploads .xlsx / .csv| ExtPopup
+    Faculty -->|Uploads files| ExtPopup
     Faculty -->|Inspects & Edits Live Form| PortalUI
     
     PortalUI <-->|Auth & Marks Data| Firebase
