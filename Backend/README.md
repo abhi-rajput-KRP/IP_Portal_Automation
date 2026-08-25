@@ -189,15 +189,16 @@ Create a `.env` file in the `Backend/` directory with the following configuratio
 ```env
 GEMINI_API_KEY=your_google_gemini_api_key
 DATABASE_URL=postgresql://user:password@host/database?sslmode=require
+FEATHERLESS_API_KEY = your_featherless_api_key
 ```
 
 - `GEMINI_API_KEY`: API key for Google Generative AI (Gemini / Gemma models).
 - `DATABASE_URL`: Connection string for PostgreSQL (e.g., Neon serverless PostgreSQL instance).
-- `FEATHERLESS_API_KEY`: = API key for Featherless AI.
+- `FEATHERLESS_API_KEY`: API key for Featherless AI.
 
 ---
 
-## Setup and Installation
+## Setup and Installation~
 
 ### 1. Prerequisites
 - Python 3.10 or higher
